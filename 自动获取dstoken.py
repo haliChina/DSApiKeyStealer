@@ -1,8 +1,9 @@
+import os
 import re
 import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-API_TOKEN = ""
+API_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 
 DEEPSEEK_BALANCE_URL = "https://api.deepseek.com/user/balance"
 GITHUB_SEARCH_URL = "https://api.github.com/search/issues?q=your key leak author:chinese-leak-key-check&sort=created&order=desc"
@@ -52,6 +53,8 @@ def check_key_balance(api_key):
 
 
 def main():
+    if not API_TOKEN:
+        print("[-] Warning: GITHUB_TOKEN env var not set. GitHub API rate limit: 60 req/hr (authenticated: 5000 req/hr).")
     print("[*] Searching GitHub leaked issues...")
     try:
         search_results = requests.get(GITHUB_SEARCH_URL, headers=HEADERS, timeout=15).json().get("items", [])
