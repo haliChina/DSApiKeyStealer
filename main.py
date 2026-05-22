@@ -35,22 +35,11 @@ def fetch_all_issues():
                 try:
                     reset_timestamp = int(reset_time)
                     reset_datetime = datetime.fromtimestamp(reset_timestamp).strftime('%Y-%m-%d %H:%M:%S')
-                    print(f"[-] Rate limit exceeded! Reset at: {reset_datetime}")
+                    print(f"[-] Rate limit exceeded! Reset at: {reset_datetime} (remaining: {remaining})")
                 except (ValueError, TypeError):
                     print(f"[-] Rate limit exceeded! Reset timestamp: {reset_time}")
-                print(f"[-] Page {page} failed with HTTP 403 (Rate Limit)")
                 break
             
-            if response.status_code == 429:
-                retry_after = response.headers.get('Retry-After', 'unknown')
-                print(f"[-] Too many requests! Retry after: {retry_after}s")
-                print(f"[-] Page {page} failed with HTTP 429 (Too Many Requests)")
-                break
-            
-            if response.status_code == 401:
-                print(f"[-] Authentication failed! Check your GitHub Token.")
-                break
-                
             if response.status_code == 422:
                 print(f"[-] Unprocessable Entity! Possibly malformed query.")
                 break
@@ -229,9 +218,9 @@ def main():
     if not API_TOKEN:
         print("\n" + "!" * 60)
         print("[!] WARNING: GITHUB_TOKEN environment variable is NOT set!")
-        print("[!] GitHub API Rate Limits:")
-        print("[!]   - Unauthenticated: 60 requests/hour")
-        print("[!]   - Authenticated:   5000 requests/hour")
+        print("[!] GitHub Search API Rate Limits (per minute):")
+        print("[!]   - Unauthenticated: 10 requests/min")
+        print("[!]   - Authenticated:   30 requests/min")
         print("[!] Please set your GitHub Token to avoid rate limits.")
         print("[!] Export: export GITHUB_TOKEN=your_token_here")
         print("!" * 60 + "\n")
@@ -253,6 +242,7 @@ def main():
 
     all_results = []
     valid_keys = []
+    valid_keys_set = set()
     cny_total = 0.0
     usd_total = 0.0
 
@@ -266,10 +256,12 @@ def main():
             all_results.append(result)
 
             if result['is_available'] and result['api_test_success']:
-                valid_keys.append(result)
-                cny_total += result['cny_balance']
-                usd_total += result['usd_balance']
-                print(f"[+] Valid Key: {result['key']} | CNY: {result['cny_balance']} | USD: {result['usd_balance']} | Response: {result['api_response_time']}ms")
+                if result['key'] not in valid_keys_set:
+                    valid_keys_set.add(result['key'])
+                    valid_keys.append(result)
+                    cny_total += result['cny_balance']
+                    usd_total += result['usd_balance']
+                    print(f"[+] Valid Key: {result['key']} | CNY: {result['cny_balance']} | USD: {result['usd_balance']} | Response: {result['api_response_time']}ms")
 
     elapsed = time.time() - start_time
     print(f"\n[*] Verification completed in {elapsed:.2f} seconds.")
