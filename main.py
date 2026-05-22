@@ -35,22 +35,11 @@ def fetch_all_issues():
                 try:
                     reset_timestamp = int(reset_time)
                     reset_datetime = datetime.fromtimestamp(reset_timestamp).strftime('%Y-%m-%d %H:%M:%S')
-                    print(f"[-] Rate limit exceeded! Reset at: {reset_datetime}")
+                    print(f"[-] Rate limit exceeded! Reset at: {reset_datetime} (remaining: {remaining})")
                 except (ValueError, TypeError):
                     print(f"[-] Rate limit exceeded! Reset timestamp: {reset_time}")
-                print(f"[-] Page {page} failed with HTTP 403 (Rate Limit)")
                 break
             
-            if response.status_code == 429:
-                retry_after = response.headers.get('Retry-After', 'unknown')
-                print(f"[-] Too many requests! Retry after: {retry_after}s")
-                print(f"[-] Page {page} failed with HTTP 429 (Too Many Requests)")
-                break
-            
-            if response.status_code == 401:
-                print(f"[-] Authentication failed! Check your GitHub Token.")
-                break
-                
             if response.status_code == 422:
                 print(f"[-] Unprocessable Entity! Possibly malformed query.")
                 break
