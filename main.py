@@ -253,6 +253,7 @@ def main():
 
     all_results = []
     valid_keys = []
+    valid_keys_set = set()
     cny_total = 0.0
     usd_total = 0.0
 
@@ -266,10 +267,12 @@ def main():
             all_results.append(result)
 
             if result['is_available'] and result['api_test_success']:
-                valid_keys.append(result)
-                cny_total += result['cny_balance']
-                usd_total += result['usd_balance']
-                print(f"[+] Valid Key: {result['key']} | CNY: {result['cny_balance']} | USD: {result['usd_balance']} | Response: {result['api_response_time']}ms")
+                if result['key'] not in valid_keys_set:
+                    valid_keys_set.add(result['key'])
+                    valid_keys.append(result)
+                    cny_total += result['cny_balance']
+                    usd_total += result['usd_balance']
+                    print(f"[+] Valid Key: {result['key']} | CNY: {result['cny_balance']} | USD: {result['usd_balance']} | Response: {result['api_response_time']}ms")
 
     elapsed = time.time() - start_time
     print(f"\n[*] Verification completed in {elapsed:.2f} seconds.")
