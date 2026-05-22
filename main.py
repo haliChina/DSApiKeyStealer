@@ -6,11 +6,14 @@ import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 
+# 请你添加 GitHub token 再对我进行狗叫
 API_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 
 DEEPSEEK_BALANCE_URL = "https://api.deepseek.com/user/balance"
 DEEPSEEK_CHAT_URL = "https://api.deepseek.com/v1/chat/completions"
+# 这个是原作者的思路 原作者太坏了
 GITHUB_SEARCH_QUERY = "your key leak author:chinese-leak-key-check"
+# 此处的Pages其实可以不用动 但是如果你发现炸了的话你把它改成5 嫌它不够快就改成15
 MAX_PAGES = 10
 PER_PAGE = 100
 
