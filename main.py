@@ -229,9 +229,9 @@ def main():
     if not API_TOKEN:
         print("\n" + "!" * 60)
         print("[!] WARNING: GITHUB_TOKEN environment variable is NOT set!")
-        print("[!] GitHub API Rate Limits:")
-        print("[!]   - Unauthenticated: 60 requests/hour")
-        print("[!]   - Authenticated:   5000 requests/hour")
+        print("[!] GitHub Search API Rate Limits (per minute):")
+        print("[!]   - Unauthenticated: 10 requests/min")
+        print("[!]   - Authenticated:   30 requests/min")
         print("[!] Please set your GitHub Token to avoid rate limits.")
         print("[!] Export: export GITHUB_TOKEN=your_token_here")
         print("!" * 60 + "\n")
