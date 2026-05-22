@@ -28,9 +28,37 @@ def fetch_all_issues():
         url = f"https://api.github.com/search/issues?q={GITHUB_SEARCH_QUERY}&sort=created&order=desc&per_page={PER_PAGE}&page={page}"
         try:
             response = requests.get(url, headers=HEADERS, timeout=15)
+            
+            if response.status_code == 403:
+                reset_time = response.headers.get('X-RateLimit-Reset', 'unknown')
+                remaining = response.headers.get('X-RateLimit-Remaining', '0')
+                try:
+                    reset_timestamp = int(reset_time)
+                    reset_datetime = datetime.fromtimestamp(reset_timestamp).strftime('%Y-%m-%d %H:%M:%S')
+                    print(f"[-] Rate limit exceeded! Reset at: {reset_datetime}")
+                except (ValueError, TypeError):
+                    print(f"[-] Rate limit exceeded! Reset timestamp: {reset_time}")
+                print(f"[-] Page {page} failed with HTTP 403 (Rate Limit)")
+                break
+            
+            if response.status_code == 429:
+                retry_after = response.headers.get('Retry-After', 'unknown')
+                print(f"[-] Too many requests! Retry after: {retry_after}s")
+                print(f"[-] Page {page} failed with HTTP 429 (Too Many Requests)")
+                break
+            
+            if response.status_code == 401:
+                print(f"[-] Authentication failed! Check your GitHub Token.")
+                break
+                
+            if response.status_code == 422:
+                print(f"[-] Unprocessable Entity! Possibly malformed query.")
+                break
+                
             if response.status_code != 200:
                 print(f"[-] Page {page} failed with HTTP {response.status_code}")
                 break
+                
             data = response.json()
             items = data.get("items", [])
             if not items:
@@ -93,15 +121,28 @@ def check_key_full(api_key):
             return result
 
         for info in balance_data.get("balance_infos", []):
-            amount = float(info.get("total_balance", 0))
-            currency = info.get("currency", "CNY")
-            if currency == "CNY":
-                result['cny_balance'] = amount
-            else:
-                result['usd_balance'] = amount
+            try:
+                total_balance_str = info.get("total_balance")
+                if total_balance_str is None:
+                    continue
+                amount = float(total_balance_str)
+                currency = info.get("currency", "CNY")
+                if currency == "CNY":
+                    result['cny_balance'] = amount
+                else:
+                    result['usd_balance'] = amount
+            except (ValueError, TypeError) as e:
+                result['error'] = f'Balance parse error: {str(e)}'
+                return result
 
-        if result['cny_balance'] < 0 and result['usd_balance'] < 0:
-            result['error'] = 'Both CNY and USD balances are negative'
+        if result['cny_balance'] < 0 or result['usd_balance'] < 0:
+            if result['cny_balance'] < 0 and result['usd_balance'] < 0:
+                result['error'] = 'Both CNY and USD balances are negative'
+            elif result['cny_balance'] < 0:
+                result['error'] = f'CNY balance is negative: {result["cny_balance"]}'
+            else:
+                result['error'] = f'USD balance is negative: {result["usd_balance"]}'
+            result['is_available'] = False
             return result
 
         result['is_available'] = True
@@ -186,7 +227,14 @@ def main():
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 
     if not API_TOKEN:
-        print("[-] Warning: GITHUB_TOKEN env var not set. GitHub API rate limit: 60 req/hr (authenticated: 5000 req/hr).")
+        print("\n" + "!" * 60)
+        print("[!] WARNING: GITHUB_TOKEN environment variable is NOT set!")
+        print("[!] GitHub API Rate Limits:")
+        print("[!]   - Unauthenticated: 60 requests/hour")
+        print("[!]   - Authenticated:   5000 requests/hour")
+        print("[!] Please set your GitHub Token to avoid rate limits.")
+        print("[!] Export: export GITHUB_TOKEN=your_token_here")
+        print("!" * 60 + "\n")
     print(f"[*] Searching GitHub leaked issues (max {MAX_PAGES} pages, {PER_PAGE} items/page)...")
     search_results = fetch_all_issues()
     if not search_results:
