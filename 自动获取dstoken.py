@@ -1,4 +1,3 @@
-import os
 import re
 import json
 import time
@@ -6,7 +5,8 @@ import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 
-API_TOKEN = os.environ.get("GITHUB_TOKEN", "")
+API_TOKEN = ""  # Option 1: Set via environment variable: export GITHUB_TOKEN="your_token"
+              # Option 2: Directly replace this empty string with your token: API_TOKEN = "ghp_xxx"
 
 DEEPSEEK_BALANCE_URL = "https://api.deepseek.com/user/balance"
 DEEPSEEK_CHAT_URL = "https://api.deepseek.com/v1/chat/completions"
@@ -183,7 +183,8 @@ def main():
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 
     if not API_TOKEN:
-        print("[-] Warning: GITHUB_TOKEN env var not set. GitHub API rate limit: 60 req/hr (authenticated: 5000 req/hr).")
+        print("[-] Warning: API_TOKEN not set. GitHub API rate limit: 60 req/hr (authenticated: 5000 req/hr).")
+        print("    Set via environment: export GITHUB_TOKEN=xxx  OR  edit API_TOKEN variable directly")
     print(f"[*] Searching GitHub leaked issues (max {MAX_PAGES} pages, {PER_PAGE} items/page)...")
     search_results = fetch_all_issues()
     if not search_results:
