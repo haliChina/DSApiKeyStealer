@@ -1,2 +1,2 @@
-# DSAPIKeyStealer
-Stealing public DS API keys from GitHub
+# 免责声明
+本仓库基于开源项目进行优化，仅供交流学习用途，下载后请**24小时内**自行删除。
