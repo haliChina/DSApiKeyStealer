@@ -8,11 +8,18 @@ Trae 的贡献是字节发神经了，我模型是自定义到的GPT5
 
 ## 常见问题解答：
 
+### 哪里获取Token？
+前往
+[选择classic并勾选你需要的权限](https://github.com/settings/tokens/new)
+
 ### 出现全是0的问题：
 解答：没加环境变量
-
 ```env
 GITHUB_TOKEN=xxx
+```
+或者你把那坨东西替换为
+```Python
+"ghp_xxxxxxxxxxxxxxxxxxxx"
 ```
 
 ### 其他问题：
