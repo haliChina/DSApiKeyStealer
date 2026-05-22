@@ -6,6 +6,12 @@ import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 
+"""
+DeepSeek API Key 泄漏检测工具
+⚠️ 本工具仅供安全研究和教育目的使用
+⚠️ 请遵守Readme内的声明
+"""
+
 # 请你添加 GitHub token 再对我进行狗叫
 API_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 
