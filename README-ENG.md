@@ -1,5 +1,9 @@
 # DeepSeek API Key Leak Checker
 
+<p align="center">
+  <a href="./README.md">简体中文 Version</a>
+</p>
+
 ## Note:
 This method is publicly applicable. If you insist on thinking that I am mass-scanning your API keys and feel the need to send an abuse report to GitHub, all I can say is you need to open your eyes.
 > This tool is intended **solely for legal security research and educational purposes**. Please delete it within **24 hours** after downloading.
