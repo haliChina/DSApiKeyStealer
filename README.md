@@ -1,5 +1,8 @@
 # DeepSeek API Key Stealer
 
+## @chinese-leak-key-check's activity is private
+方法已被修复
+
 ## ⚠️ 免责声明 / Disclaimer
 > 本工具仅供**合法的安全研究和教育目的**使用，下载后请**24小时内**自行删除。
 
