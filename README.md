@@ -1,6 +1,11 @@
-# DeepSeek API Key Stealer
+# DeepSeek API Key Leak Checker
 
-## @chinese-leak-key-check's activity is private
+## 请注意，兄弟你不要急眼
+此方法为公开适用，如果你非要觉得我在批量扫你的apikey导致你要给GitHub发abuse，那只能说你没长眼睛。
+> 本工具仅供**合法的安全研究和教育目的**使用，下载后请**24小时内**自行删除。
+注意这段话，本工具本质上为交流学习所用，从未收集过其他用户的信息也从未允许他人使用本工具进行扫描。
+
+### @chinese-leak-key-check's activity is private
 方法已被修复
 
 ## ⚠️ 免责声明 / Disclaimer
