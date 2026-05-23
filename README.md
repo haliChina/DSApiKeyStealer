@@ -1,5 +1,9 @@
 # DeepSeek API Key Leak Checker
 
+<p align="center">
+  <a href="./README-ENG.md">English Version</a>
+</p>
+
 ## 请注意，兄弟你不要急眼
 此方法为公开适用，如果你非要觉得我在批量扫你的apikey导致你要给GitHub发abuse，那只能说你没长眼睛。
 > 本工具仅供**合法的安全研究和教育目的**使用，下载后请**24小时内**自行删除。
